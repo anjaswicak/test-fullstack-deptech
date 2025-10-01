@@ -30,8 +30,11 @@ COPY . /var/www/html
 # Copy existing application directory permissions
 COPY --chown=www-data:www-data . /var/www/html
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Copy MySQL SSL configuration
+COPY mysql-ssl-disable.cnf /etc/mysql/conf.d/ssl-disable.cnf
+
+# Install PHP dependencies (include dev dependencies for seeders)
+RUN composer install --optimize-autoloader
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -55,15 +58,25 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
     echo 'cd /var/www/html' >> /usr/local/bin/start.sh && \
     echo '# Create .env file if it does not exist' >> /usr/local/bin/start.sh && \
     echo 'if [ ! -f .env ]; then' >> /usr/local/bin/start.sh && \
-    echo '    cp .env.example .env' >> /usr/local/bin/start.sh && \
-    echo '    echo "Created .env from .env.example"' >> /usr/local/bin/start.sh && \
+    echo '    cp .env.docker .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "Created .env from .env.docker"' >> /usr/local/bin/start.sh && \
     echo 'fi' >> /usr/local/bin/start.sh && \
-    echo '# Add SSL configuration to .env if not present' >> /usr/local/bin/start.sh && \
+    echo '# Ensure APP_KEY exists in .env' >> /usr/local/bin/start.sh && \
+    echo 'if ! grep -q "^APP_KEY=" .env; then' >> /usr/local/bin/start.sh && \
+    echo '    echo "APP_KEY=" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "Added APP_KEY to .env"' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Add comprehensive SSL configuration to .env if not present' >> /usr/local/bin/start.sh && \
     echo 'if ! grep -q "MYSQL_ATTR_SSL_VERIFY_SERVER_CERT" .env; then' >> /usr/local/bin/start.sh && \
     echo '    echo "" >> .env' >> /usr/local/bin/start.sh && \
-    echo '    echo "# MySQL SSL Configuration" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "# MySQL SSL Configuration - Disable all SSL verification" >> .env' >> /usr/local/bin/start.sh && \
     echo '    echo "MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=false" >> .env' >> /usr/local/bin/start.sh && \
     echo '    echo "MYSQL_ATTR_SSL_CA=" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "MYSQL_ATTR_SSL_CAPATH=" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "MYSQL_ATTR_SSL_CERT=" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "MYSQL_ATTR_SSL_CIPHER=" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "MYSQL_ATTR_SSL_KEY=" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "DB_SSLMODE=disable" >> .env' >> /usr/local/bin/start.sh && \
     echo 'fi' >> /usr/local/bin/start.sh && \
     echo '# Wait for database to be ready' >> /usr/local/bin/start.sh && \
     echo 'echo "Waiting for database connection..."' >> /usr/local/bin/start.sh && \
@@ -76,10 +89,30 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
     echo '    sleep 2' >> /usr/local/bin/start.sh && \
     echo 'done' >> /usr/local/bin/start.sh && \
     echo '# Generate app key if not set' >> /usr/local/bin/start.sh && \
-    echo 'php artisan key:generate --force' >> /usr/local/bin/start.sh && \
+    echo 'APP_KEY_VALUE=$(grep "^APP_KEY=" .env | cut -d"=" -f2)' >> /usr/local/bin/start.sh && \
+    echo 'if [ -z "$APP_KEY_VALUE" ] || [ "$APP_KEY_VALUE" = "" ]; then' >> /usr/local/bin/start.sh && \
+    echo '    echo "Generating application key..."' >> /usr/local/bin/start.sh && \
+    echo '    if php artisan key:generate --force --show > /tmp/app_key 2>/dev/null; then' >> /usr/local/bin/start.sh && \
+    echo '        NEW_KEY=$(cat /tmp/app_key)' >> /usr/local/bin/start.sh && \
+    echo '        sed -i "s/^APP_KEY=.*/APP_KEY=$NEW_KEY/" .env' >> /usr/local/bin/start.sh && \
+    echo '        echo "Application key generated successfully"' >> /usr/local/bin/start.sh && \
+    echo '        rm -f /tmp/app_key' >> /usr/local/bin/start.sh && \
+    echo '    else' >> /usr/local/bin/start.sh && \
+    echo '        echo "Using manual key generation..."' >> /usr/local/bin/start.sh && \
+    echo '        MANUAL_KEY="base64:$(openssl rand -base64 32)"' >> /usr/local/bin/start.sh && \
+    echo '        sed -i "s/^APP_KEY=.*/APP_KEY=$MANUAL_KEY/" .env' >> /usr/local/bin/start.sh && \
+    echo '        echo "Manual application key set"' >> /usr/local/bin/start.sh && \
+    echo '    fi' >> /usr/local/bin/start.sh && \
+    echo 'else' >> /usr/local/bin/start.sh && \
+    echo '    echo "Application key already set"' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
     echo '# Clear caches' >> /usr/local/bin/start.sh && \
     echo 'php artisan config:clear' >> /usr/local/bin/start.sh && \
     echo 'php artisan cache:clear' >> /usr/local/bin/start.sh && \
+    echo '# Set MySQL SSL environment variables for all database operations' >> /usr/local/bin/start.sh && \
+    echo 'export MYSQL_OPT_SSL_VERIFY_SERVER_CERT=0' >> /usr/local/bin/start.sh && \
+    echo 'export MYSQL_OPT_SSL_MODE=DISABLED' >> /usr/local/bin/start.sh && \
+    echo 'export MYSQL_HOME=/etc/mysql' >> /usr/local/bin/start.sh && \
     echo '# Run migrations and seeders with error handling' >> /usr/local/bin/start.sh && \
     echo 'echo "Running database migrations..."' >> /usr/local/bin/start.sh && \
     echo 'if ! php artisan migrate --force --no-interaction; then' >> /usr/local/bin/start.sh && \
