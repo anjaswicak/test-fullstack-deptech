@@ -30,9 +30,6 @@ COPY . /var/www/html
 # Copy existing application directory permissions
 COPY --chown=www-data:www-data . /var/www/html
 
-# Copy MySQL SSL configuration
-COPY mysql-ssl-disable.cnf /etc/mysql/conf.d/ssl-disable.cnf
-
 # Install PHP dependencies (include dev dependencies for seeders)
 RUN composer install --optimize-autoloader
 
@@ -112,7 +109,9 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
     echo '# Set MySQL SSL environment variables for all database operations' >> /usr/local/bin/start.sh && \
     echo 'export MYSQL_OPT_SSL_VERIFY_SERVER_CERT=0' >> /usr/local/bin/start.sh && \
     echo 'export MYSQL_OPT_SSL_MODE=DISABLED' >> /usr/local/bin/start.sh && \
-    echo 'export MYSQL_HOME=/etc/mysql' >> /usr/local/bin/start.sh && \
+    echo '# Create MySQL options file to disable SSL' >> /usr/local/bin/start.sh && \
+    echo 'echo "[client]" > ~/.my.cnf' >> /usr/local/bin/start.sh && \
+    echo 'echo "ssl=0" >> ~/.my.cnf' >> /usr/local/bin/start.sh && \
     echo '# Run migrations and seeders with error handling' >> /usr/local/bin/start.sh && \
     echo 'echo "Running database migrations..."' >> /usr/local/bin/start.sh && \
     echo 'if ! php artisan migrate --force --no-interaction; then' >> /usr/local/bin/start.sh && \
