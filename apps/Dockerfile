@@ -9,16 +9,19 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including devDependencies for build)
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies including devDependencies
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -40,6 +43,12 @@ ENV NEXT_TELEMETRY_DISABLED 1
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Copy package.json for runtime dependencies
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application
 COPY --from=builder /app/public ./public
