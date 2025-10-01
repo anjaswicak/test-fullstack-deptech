@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardLayout from '@/components/DashboardLayout';
 import { api } from '@/lib/api';
+import Image from 'next/image';
 import { 
   Plus, 
   Edit3, 
@@ -24,7 +25,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
         <div className="flex items-start space-x-3">
           <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
             {product.gambar_produk ? (
-              <img 
+              <Image 
                 src={`http://localhost:8000/storage/${product.gambar_produk}`}
                 alt={product.nama_produk}
                 className="w-full h-full object-cover"
@@ -350,7 +351,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
             
             {imagePreview && (
               <div className="mt-2">
-                <img 
+                <Image 
                   src={imagePreview} 
                   alt="Preview" 
                   className="w-32 h-32 object-cover rounded-lg border"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Select from 'react-select';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -313,11 +313,7 @@ export default function TransactionsPage() {
   const [showModal, setShowModal] = useState(false);
   const [pagination, setPagination] = useState({});
 
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
-
-  const fetchTransactions = async (page = 1) => {
+  const fetchTransactions = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -339,7 +335,11 @@ export default function TransactionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, typeFilter]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   const handleAddTransaction = () => {
     setShowModal(true);
