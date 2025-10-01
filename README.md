@@ -37,7 +37,6 @@ php artisan serve
 ```bash
 cd apps
 npm install
-cp .env.example .env.local
 npm run dev
 ```
 
@@ -109,11 +108,11 @@ Setelah setup selesai, gunakan kredensial berikut:
 
 ### Super Admin
 - **Email**: admin@example.com
-- **Password**: password
+- **Password**: password123
 
 ### Admin
 - **Email**: user@example.com
-- **Password**: password
+- **Password**: password123
 
 ## 📋 API Documentation
 
