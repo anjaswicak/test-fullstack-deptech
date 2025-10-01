@@ -38,12 +38,6 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
-# Configure Apache
-COPY docker/apache-config.conf /etc/apache2/sites-available/000-default.conf
-
-# Create Apache config if not exists
-RUN mkdir -p docker
-
 # Create Apache configuration
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf && \
     echo '    DocumentRoot /var/www/html/public' >> /etc/apache2/sites-available/000-default.conf && \
@@ -57,9 +51,10 @@ RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf &&
 
 # Create startup script
 RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
+    echo 'cd /var/www/html' >> /usr/local/bin/start.sh && \
     echo 'php artisan key:generate --force' >> /usr/local/bin/start.sh && \
-    echo 'php artisan config:cache' >> /usr/local/bin/start.sh && \
-    echo 'php artisan route:cache' >> /usr/local/bin/start.sh && \
+    echo 'php artisan config:clear' >> /usr/local/bin/start.sh && \
+    echo 'php artisan cache:clear' >> /usr/local/bin/start.sh && \
     echo 'php artisan migrate --force' >> /usr/local/bin/start.sh && \
     echo 'php artisan db:seed --force' >> /usr/local/bin/start.sh && \
     echo 'apache2-foreground' >> /usr/local/bin/start.sh && \
