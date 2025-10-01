@@ -56,7 +56,7 @@ Sistem manajemen stok inventori dengan teknologi full-stack modern yang mendukun
 2. **Setup Environment Files**
    ```bash
    cp api/.env.docker api/.env
-   cp app/.env.docker app/.env.local
+   cp apps/.env.docker apps/.env.local
    cp .env.docker .env
    ```
 
@@ -201,7 +201,7 @@ test-fullstack-deptech/
 │   ├── Dockerfile.dev      # Development build
 │   ├── .dockerignore       # Docker ignore rules
 │   └── .env.docker         # Environment template
-├── app/                     # Next.js Frontend
+├── apps/                    # Next.js Frontend
 │   ├── Dockerfile          # Production build
 │   ├── .dockerignore       # Docker ignore rules
 │   ├── next.config.js      # Next.js configuration
@@ -245,7 +245,7 @@ php artisan serve
 
 ### Frontend Setup
 ```bash
-cd app
+cd apps
 npm install
 cp .env.example .env.local
 npm run dev
@@ -382,7 +382,7 @@ npm test
 
 **Manual (Non-Docker):**
 ```bash
-cd app
+cd apps
 npm test
 ```
 

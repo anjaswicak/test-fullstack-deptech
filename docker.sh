@@ -110,8 +110,8 @@ case $1 in
             print_info "Copied API environment file"
         fi
         
-        if [ ! -f ./app/.env.local ]; then
-            cp ./app/.env.docker ./app/.env.local
+        if [ ! -f ./apps/.env.local ]; then
+            cp ./apps/.env.docker ./apps/.env.local
             print_info "Copied APP environment file"
         fi
         
@@ -177,7 +177,7 @@ case $1 in
     "shell-app")
         check_docker
         print_info "Opening shell in APP container..."
-        docker-compose exec app sh
+        docker-compose exec apps sh
         ;;
     
     "db")
