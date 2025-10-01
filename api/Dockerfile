@@ -52,11 +52,26 @@ RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf &&
 # Create startup script
 RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
     echo 'cd /var/www/html' >> /usr/local/bin/start.sh && \
+    echo '# Create .env file if it does not exist' >> /usr/local/bin/start.sh && \
+    echo 'if [ ! -f .env ]; then' >> /usr/local/bin/start.sh && \
+    echo '    cp .env.example .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "Created .env from .env.example"' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Wait for database to be ready' >> /usr/local/bin/start.sh && \
+    echo 'echo "Waiting for database connection..."' >> /usr/local/bin/start.sh && \
+    echo 'while ! mysqladmin ping -h"$DB_HOST" -u"$DB_USERNAME" -p"$DB_PASSWORD" --silent; do' >> /usr/local/bin/start.sh && \
+    echo '    sleep 1' >> /usr/local/bin/start.sh && \
+    echo 'done' >> /usr/local/bin/start.sh && \
+    echo 'echo "Database is ready!"' >> /usr/local/bin/start.sh && \
+    echo '# Generate app key if not set' >> /usr/local/bin/start.sh && \
     echo 'php artisan key:generate --force' >> /usr/local/bin/start.sh && \
+    echo '# Clear caches' >> /usr/local/bin/start.sh && \
     echo 'php artisan config:clear' >> /usr/local/bin/start.sh && \
     echo 'php artisan cache:clear' >> /usr/local/bin/start.sh && \
+    echo '# Run migrations and seeders' >> /usr/local/bin/start.sh && \
     echo 'php artisan migrate --force' >> /usr/local/bin/start.sh && \
     echo 'php artisan db:seed --force' >> /usr/local/bin/start.sh && \
+    echo '# Start Apache' >> /usr/local/bin/start.sh && \
     echo 'apache2-foreground' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
 

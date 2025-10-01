@@ -119,18 +119,14 @@ case $1 in
         docker-compose build
         docker-compose up -d
         
-        # Wait for database to be ready
-        print_info "Waiting for database to be ready..."
-        sleep 30
-        
-        # Generate app key and run migrations
-        generate_app_key
-        run_migrations
-        run_seeders
+        print_info "Containers are starting up..."
+        print_info "Laravel is initializing (this may take a moment)..."
+        print_info "Database migrations and seeding will run automatically"
         
         print_success "Setup completed!"
         print_info "Frontend: http://localhost:3000"
         print_info "Backend: http://localhost:8000"
+        print_info "Use 'docker-compose logs -f' to monitor startup progress"
         ;;
     
     "logs")
