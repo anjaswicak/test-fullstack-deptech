@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: stock_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: stock_management
+      MYSQL_USER: stock_user
+      MYSQL_PASSWORD: stock_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./api/database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - stock_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Laravel API Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: stock_api
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_KEY=base64:YourAppKeyHere
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=stock_management
+      - DB_USERNAME=stock_user
+      - DB_PASSWORD=stock_password
+      - JWT_SECRET=your_jwt_secret_key_here
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+    volumes:
+      - ./api/storage:/var/www/html/storage
+      - ./api/public/storage:/var/www/html/public/storage
+    ports:
+      - "8000:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - stock_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/api/test || exit 1"]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Next.js Frontend
+  apps:
+    build:
+      context: ./apps
+      dockerfile: Dockerfile
+    container_name: stock_apps
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - stock_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Redis (Optional for caching)
+  redis:
+    image: redis:7-alpine
+    container_name: stock_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - stock_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  stock_network:
+    driver: bridge

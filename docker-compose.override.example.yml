@@ -1,0 +1,48 @@
+# Docker Compose Override for Local Development
+# Copy this to docker-compose.override.yml and modify as needed
+
+version: '3.8'
+
+services:
+  # Override API service for local development
+  api:
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - LOG_LEVEL=debug
+    volumes:
+      - ./api/storage/logs:/var/www/html/storage/logs
+    ports:
+      - "8000:80"
+
+  # Override APP service for local development  
+  apps:
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./apps/.next:/apps/.next
+
+  # Add additional services for development
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: stock_mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - stock_network
+
+  # Add Adminer for database management
+  adminer:
+    image: adminer:latest
+    container_name: stock_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    networks:
+      - stock_network
+    depends_on:
+      - mysql
