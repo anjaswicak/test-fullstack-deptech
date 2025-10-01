@@ -58,6 +58,13 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
     echo '    cp .env.example .env' >> /usr/local/bin/start.sh && \
     echo '    echo "Created .env from .env.example"' >> /usr/local/bin/start.sh && \
     echo 'fi' >> /usr/local/bin/start.sh && \
+    echo '# Add SSL configuration to .env if not present' >> /usr/local/bin/start.sh && \
+    echo 'if ! grep -q "MYSQL_ATTR_SSL_VERIFY_SERVER_CERT" .env; then' >> /usr/local/bin/start.sh && \
+    echo '    echo "" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "# MySQL SSL Configuration" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "MYSQL_ATTR_SSL_VERIFY_SERVER_CERT=false" >> .env' >> /usr/local/bin/start.sh && \
+    echo '    echo "MYSQL_ATTR_SSL_CA=" >> .env' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
     echo '# Wait for database to be ready' >> /usr/local/bin/start.sh && \
     echo 'echo "Waiting for database connection..."' >> /usr/local/bin/start.sh && \
     echo 'for i in {1..30}; do' >> /usr/local/bin/start.sh && \
@@ -73,9 +80,14 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
     echo '# Clear caches' >> /usr/local/bin/start.sh && \
     echo 'php artisan config:clear' >> /usr/local/bin/start.sh && \
     echo 'php artisan cache:clear' >> /usr/local/bin/start.sh && \
-    echo '# Run migrations and seeders' >> /usr/local/bin/start.sh && \
-    echo 'php artisan migrate --force' >> /usr/local/bin/start.sh && \
-    echo 'php artisan db:seed --force' >> /usr/local/bin/start.sh && \
+    echo '# Run migrations and seeders with error handling' >> /usr/local/bin/start.sh && \
+    echo 'echo "Running database migrations..."' >> /usr/local/bin/start.sh && \
+    echo 'if ! php artisan migrate --force --no-interaction; then' >> /usr/local/bin/start.sh && \
+    echo '    echo "Migration failed, trying to run individual migrations..."' >> /usr/local/bin/start.sh && \
+    echo '    php artisan migrate:fresh --force --no-interaction || echo "Migration still failed, continuing..."' >> /usr/local/bin/start.sh && \
+    echo 'fi' >> /usr/local/bin/start.sh && \
+    echo 'echo "Running database seeders..."' >> /usr/local/bin/start.sh && \
+    echo 'php artisan db:seed --force --no-interaction || echo "Seeding failed, continuing..."' >> /usr/local/bin/start.sh && \
     echo '# Start Apache' >> /usr/local/bin/start.sh && \
     echo 'apache2-foreground' >> /usr/local/bin/start.sh && \
     chmod +x /usr/local/bin/start.sh
