@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     default-mysql-client \
+    netcat-openbsd \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Enable Apache mod_rewrite
@@ -59,10 +60,14 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start.sh && \
     echo 'fi' >> /usr/local/bin/start.sh && \
     echo '# Wait for database to be ready' >> /usr/local/bin/start.sh && \
     echo 'echo "Waiting for database connection..."' >> /usr/local/bin/start.sh && \
-    echo 'while ! mysqladmin ping -h"$DB_HOST" -u"$DB_USERNAME" -p"$DB_PASSWORD" --silent; do' >> /usr/local/bin/start.sh && \
-    echo '    sleep 1' >> /usr/local/bin/start.sh && \
+    echo 'for i in {1..30}; do' >> /usr/local/bin/start.sh && \
+    echo '    if nc -z ${DB_HOST:-mysql} ${DB_PORT:-3306}; then' >> /usr/local/bin/start.sh && \
+    echo '        echo "Database is ready!"' >> /usr/local/bin/start.sh && \
+    echo '        break' >> /usr/local/bin/start.sh && \
+    echo '    fi' >> /usr/local/bin/start.sh && \
+    echo '    echo "Waiting for database... attempt $i/30"' >> /usr/local/bin/start.sh && \
+    echo '    sleep 2' >> /usr/local/bin/start.sh && \
     echo 'done' >> /usr/local/bin/start.sh && \
-    echo 'echo "Database is ready!"' >> /usr/local/bin/start.sh && \
     echo '# Generate app key if not set' >> /usr/local/bin/start.sh && \
     echo 'php artisan key:generate --force' >> /usr/local/bin/start.sh && \
     echo '# Clear caches' >> /usr/local/bin/start.sh && \
