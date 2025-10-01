@@ -12,6 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            // Drop existing role column and recreate with correct enum values
+            $table->dropColumn('role');
+        });
+        
+        Schema::table('users', function (Blueprint $table) {
             $table->enum('role', ['super_admin', 'admin', 'user'])->default('user')->after('email');
         });
     }
@@ -23,6 +28,10 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('role');
+        });
+        
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['super_admin','admin', 'user'])->default('user')->after('email');
         });
     }
 };

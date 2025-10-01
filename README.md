@@ -31,6 +31,7 @@ php artisan migrate
 php artisan db:seed
 php artisan serve
 ```
+- sesuaikan koneksi database dengan yang digunakan
 
 ### Frontend Setup
 ```bash
