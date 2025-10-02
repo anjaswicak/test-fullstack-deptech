@@ -113,15 +113,3 @@ Setelah setup selesai, gunakan kredensial berikut:
 ### Admin
 - **Email**: user@example.com
 - **Password**: password123
-
-## 📋 API Documentation
-
-Dokumentasi API lengkap tersedia di:
-- **File**: `api/README.md`
-- **Endpoints**: `/api/v1/*`
-- **Authentication**: Bearer Token (JWT)
-
-### Base URLs
-- **Production**: http://localhost:8000/api
-- **Development**: http://localhost:8000/api
-
