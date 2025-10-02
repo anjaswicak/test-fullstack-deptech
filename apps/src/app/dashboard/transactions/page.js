@@ -380,7 +380,7 @@ export default function TransactionsPage() {
             </div>
             <button
               onClick={handleAddTransaction}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
             >
               <Plus className="h-5 w-5" />
               <span>Tambah Transaksi</span>
@@ -416,7 +416,7 @@ export default function TransactionsPage() {
 
               <button
                 onClick={handleSearch}
-                className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
               >
                 <Search className="h-5 w-5" />
                 <span>Cari</span>
@@ -513,7 +513,7 @@ export default function TransactionsPage() {
               {!searchTerm && !typeFilter && (
                 <button
                   onClick={handleAddTransaction}
-                  className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
                 >
                   <Plus className="h-5 w-5" />
                   <span>Tambah Transaksi</span>

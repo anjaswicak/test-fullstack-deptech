@@ -28,6 +28,7 @@ composer install
 cp .env.example .env
 # sesuaikan koneksi database dengan yang digunakan di file .env
 php artisan key:generate
+php artisan storage:link
 php artisan migrate
 php artisan db:seed
 php artisan serve
