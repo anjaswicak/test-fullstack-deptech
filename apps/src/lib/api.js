@@ -76,7 +76,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if ((error.response?.status === 401 || error.response?.status === 500) && !originalRequest._retry) {
       if (isRefreshing) {
         // Jika sedang refresh, masukkan request ke queue
         return new Promise((resolve, reject) => {
@@ -100,6 +100,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
+        console.error('Error refreshing token:', refreshError);
         processQueue(refreshError, null);
         return Promise.reject(refreshError);
       } finally {
@@ -112,3 +113,12 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+// Profile API functions
+export const profileAPI = {
+  // Get current user profile
+  getProfile: () => api.get('/v1/profile'),
+  
+  // Update current user profile
+  updateProfile: (profileData) => api.put('/v1/profile', profileData),
+};

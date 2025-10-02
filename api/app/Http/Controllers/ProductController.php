@@ -26,6 +26,7 @@ class ProductController extends Controller
             if ($request->has('search') && $request->search) {
                 $query->where('nama_produk', 'like', '%' . $request->search . '%');
             }
+            $query->orderBy('created_at', 'desc');
 
             $products = $query->paginate(10);
 

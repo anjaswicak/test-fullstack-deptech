@@ -27,6 +27,8 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
             {product.gambar_produk ? (
               <Image 
                 src={`http://localhost:8000/storage/${product.gambar_produk}`}
+                width="32"
+                height="32"
                 alt={product.nama_produk}
                 className="w-full h-full object-cover"
               />
@@ -353,6 +355,8 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
               <div className="mt-2">
                 <Image 
                   src={imagePreview} 
+                  width="32"
+                  height="32"
                   alt="Preview" 
                   className="w-32 h-32 object-cover rounded-lg border"
                 />

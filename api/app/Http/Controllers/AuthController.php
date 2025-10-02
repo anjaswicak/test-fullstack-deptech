@@ -104,6 +104,109 @@ class AuthController extends Controller
     }
 
     /**
+     * Get the authenticated user's profile
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProfile()
+    {
+        $user = auth()->user();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile retrieved successfully',
+            'data' => [
+                'user' => $user,
+                'permissions' => [
+                    'is_admin' => $user->isAdmin(),
+                    'is_super_admin' => $user->isSuperAdmin(),
+                    'is_user' => $user->isUser(),
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * Update the authenticated user's profile
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'nama_depan' => 'nullable|string|max:255',
+            'nama_belakang' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'tanggal_lahir' => 'nullable|date',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'current_password' => 'nullable|string|min:6',
+            'password' => 'nullable|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+                'status_code' => 422
+            ], 422);
+        }
+
+        // Jika ingin mengganti password, validasi password lama
+        if ($request->filled('password')) {
+            if (!$request->filled('current_password')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password is required to change password',
+                    'status_code' => 422
+                ], 422);
+            }
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password is incorrect',
+                    'status_code' => 422
+                ], 422);
+            }
+        }
+
+        // Update data profile
+        $updateData = [
+            'name' => $request->name,
+            'nama_depan' => $request->nama_depan,
+            'nama_belakang' => $request->nama_belakang,
+            'email' => $request->email,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'jenis_kelamin' => $request->jenis_kelamin,
+        ];
+
+        // Jika ada password baru, hash dan tambahkan
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($updateData);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'data' => [
+                'user' => $user->fresh(),
+                'permissions' => [
+                    'is_admin' => $user->isAdmin(),
+                    'is_super_admin' => $user->isSuperAdmin(),
+                    'is_user' => $user->isUser(),
+                ]
+            ]
+        ]);
+    }
+
+    /**
      * Log the user out (Invalidate the token).
      *
      * @param Request $request

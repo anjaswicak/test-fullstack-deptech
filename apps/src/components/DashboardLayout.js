@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -13,7 +13,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  Home
+  Home,
+  User,
+  ChevronDown
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -30,6 +32,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { href: '/dashboard/categories', label: 'Kategori', icon: FolderOpen },
     { href: '/dashboard/products', label: 'Produk', icon: Package },
     { href: '/dashboard/transactions', label: 'Transaksi', icon: ArrowUpDown },
+    { href: '/dashboard/profile', label: 'Profil Saya', icon: User },
   ];
 
   if (isSuperAdmin) {
@@ -113,7 +116,28 @@ const Sidebar = ({ isOpen, onClose }) => {
 
 const DashboardLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useAuth();
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userDropdownOpen && !event.target.closest('.user-dropdown')) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userDropdownOpen]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,6 +158,50 @@ const DashboardLayout = ({ children }) => {
               <h2 className="text-xl font-semibold text-gray-900">
                 Selamat datang kembali, {user?.nama_depan || user?.name}!
               </h2>
+            </div>
+            
+            {/* User Dropdown */}
+            <div className="relative user-dropdown">
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {user?.nama_depan?.charAt(0) || user?.name?.charAt(0)}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                  {user?.nama_depan || user?.name}
+                </span>
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              </button>
+              
+              {/* Dropdown Menu */}
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="py-1">
+                    <Link
+                      href="/dashboard/profile"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setUserDropdownOpen(false)}
+                    >
+                      <User className="h-4 w-4 mr-3" />
+                      Profil Saya
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <LogOut className="h-4 w-4 mr-3" />
+                      Keluar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>

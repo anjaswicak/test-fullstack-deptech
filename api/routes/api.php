@@ -124,18 +124,8 @@ Route::middleware('auth:api')->prefix('v1')->group(function () {
     });
 
     // User profile route
-    Route::get('/profile', function (Request $request) {
-        return response()->json([
-            'success' => true,
-            'message' => 'User profile',
-            'user' => $request->user(),
-            'permissions' => [
-                'is_admin' => $request->user()->isAdmin(),
-                'is_super_admin' => $request->user()->isSuperAdmin(),
-                'is_user' => $request->user()->isUser(),
-            ]
-        ]);
-    });
+    Route::get('/profile', [AuthController::class, 'getProfile']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 });
 
 // Fallback route for 404 - must be at the end
