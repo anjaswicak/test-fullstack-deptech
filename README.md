@@ -101,15 +101,3 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME="Stock Management System"
 ```
-
-## 🚦 Default Credentials
-
-Setelah setup selesai, gunakan kredensial berikut:
-
-### Super Admin
-- **Email**: admin@example.com
-- **Password**: password123
-
-### Admin
-- **Email**: user@example.com
-- **Password**: password123
