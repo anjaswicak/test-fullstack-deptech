@@ -121,7 +121,7 @@ class AdminController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            // 'name' => 'required|string|max:255',
             'nama_depan' => 'required|string|max:255',
             'nama_belakang' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
@@ -143,7 +143,8 @@ class AdminController extends Controller
             $admin = User::whereIn('role', ['admin', 'super_admin'])->findOrFail($id);
 
             $updateData = [
-                'name' => $request->name,
+                'name' => $request->nama_depan.' '. $request->nama_belakang,
+                // 'name' => $request->name,
                 'nama_depan' => $request->nama_depan,
                 'nama_belakang' => $request->nama_belakang,
                 'email' => $request->email,

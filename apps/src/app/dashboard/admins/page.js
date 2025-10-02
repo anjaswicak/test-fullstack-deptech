@@ -64,7 +64,7 @@ const AdminCard = ({ admin, onEdit, onDelete, onViewProfile }) => {
             </div>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2" style={{ flexDirection: 'column' }}>
           <button
             onClick={() => onViewProfile(admin)}
             className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors cursor-pointer"

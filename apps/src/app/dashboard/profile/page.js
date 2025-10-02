@@ -12,7 +12,7 @@ export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [formData, setFormData] = useState({
-        name: '',
+        // name: '',
         nama_depan: '',
         nama_belakang: '',
         email: '',
@@ -40,7 +40,7 @@ export default function ProfilePage() {
             // console.log(userData)
             const formattedDate = userData.tanggal_lahir ? new Date(userData.tanggal_lahir).toISOString().split('T')[0] : '';
             setFormData({
-                name: userData.name || '',
+                // name: userData.name || '',
                 nama_depan: userData.nama_depan || '',
                 nama_belakang: userData.nama_belakang || '',
                 email: userData.email || '',
@@ -85,7 +85,7 @@ export default function ProfilePage() {
             setIsUpdating(true);
 
             const updateData = {
-                name: formData.name,
+                // name: formData.name,
                 nama_depan: formData.nama_depan,
                 nama_belakang: formData.nama_belakang,
                 email: formData.email,
@@ -250,13 +250,6 @@ export default function ProfilePage() {
                                     /* View Mode */
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">
-                                                    Nama Lengkap
-                                                </label>
-                                                <p className="text-gray-900">{profile?.name || '-'}</p>
-                                            </div>
-
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-500 mb-1">
                                                     Nama Depan
