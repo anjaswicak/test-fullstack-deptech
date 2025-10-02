@@ -26,12 +26,12 @@ Sistem manajemen stok inventori dengan teknologi full-stack modern yang mendukun
 cd api
 composer install
 cp .env.example .env
+# sesuaikan koneksi database dengan yang digunakan di file .env
 php artisan key:generate
 php artisan migrate
 php artisan db:seed
 php artisan serve
 ```
-- sesuaikan koneksi database dengan yang digunakan
 
 ### Frontend Setup
 ```bash

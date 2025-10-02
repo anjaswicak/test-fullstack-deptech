@@ -39,7 +39,7 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            // 'name' => 'required|string|max:255',
             'nama_depan' => 'required|string|max:255',
             'nama_belakang' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -59,7 +59,7 @@ class AdminController extends Controller
 
         try {
             $admin = User::create([
-                'name' => $request->name,
+                'name' => $request->nama_depan.' '. $request->nama_belakang,
                 'nama_depan' => $request->nama_depan,
                 'nama_belakang' => $request->nama_belakang,
                 'email' => $request->email,
