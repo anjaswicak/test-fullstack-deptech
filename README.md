@@ -37,7 +37,7 @@ php artisan serve
 ```bash
 cd apps
 npm install
-npm run dev
+npm run build && npm start
 ```
 
 ## 🎯 Fitur Aplikasi
